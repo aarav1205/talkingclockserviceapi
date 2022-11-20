@@ -11,12 +11,8 @@ public class ClockResponse {
 	public String getValue() {
 		return value;
 	}
-	public void setValue(final String value) {
+	public void setValue(String value) {
 		this.value = value;
 	}
 	
-	
-
-
-
 }
