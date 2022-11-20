@@ -59,8 +59,27 @@ public class ClockControllerTest {
 		
 	}
 	@Test
+	public void getInputTimeTest() throws Exception {
+		String input = "22:00";
+		mockMVC.perform( MockMvcRequestBuilders
+				.get("/clock?time="+input)
+				.accept(MediaType.APPLICATION_JSON))
+		.andExpect(status().isOk())
+		.andExpect(MockMvcResultMatchers.jsonPath("$.value",is("Ten O'clock")));
+		
+	}
+	@Test
 	public void getInvalidInputTimeTest() throws Exception {
 		String input = "12:1a";
+		mockMVC.perform( MockMvcRequestBuilders
+				.get("/clock?time="+input)
+				.accept(MediaType.APPLICATION_JSON))
+		.andExpect(status().isBadRequest());
+		
+	}
+	@Test
+	public void getInvalidInput2TimeTest() throws Exception {
+		String input = "12:99";
 		mockMVC.perform( MockMvcRequestBuilders
 				.get("/clock?time="+input)
 				.accept(MediaType.APPLICATION_JSON))

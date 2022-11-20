@@ -9,62 +9,72 @@ import lloyds.co.uk.talkingclock.config.ClockConfiguration;
 public class ClockService {
 
 	@Autowired
-	private ClockConfiguration clockconfiguration;
+	ClockConfiguration clockconfiguration;
+
+	private final String string_colon_splitter=":";
+	private final String string_Oclock=" O'clock";
+	private final String string_QuaterPast_clock="Quarter past ";
+	private final String string_HalfPast_clock="Half past ";
+	private final String string_QuaterTo_clock="Quarter to ";
+	private final String string_Past_clock=" past ";
+	private final String string_To_clock=" to ";
+
+
 
 	public String calculateHumanFriendlyTime(String numericTime) {
 
 		//numericTime expected value HH:MM
 		String humanFriendlyTime = null;
-		String hh =numericTime.split(":")[0];
-		String mm =numericTime.split(":")[1];
-		if(Integer.parseInt(hh)>=0 && Integer.parseInt(hh)<24 && Integer.parseInt(mm)==00) {
-			if(Integer.parseInt(hh)==0 || Integer.parseInt(hh)==12) {
-				humanFriendlyTime =  clockconfiguration.hourMap().get(12) + " o'clock";
+		int hh =Integer.parseInt(numericTime.split(string_colon_splitter)[0]);
+		int mm =Integer.parseInt(numericTime.split(string_colon_splitter)[1]);
+		if(hh>=0 && hh<24 && mm==00) {
+			if(hh==0 || hh==12) {
+				humanFriendlyTime =  clockconfiguration.numberInWordsMap().get(12) + string_Oclock;
 			}else {
-				humanFriendlyTime =  clockconfiguration.hourMap().get(Integer.parseInt(hh)%12) + " o'clock";
+				humanFriendlyTime =  clockconfiguration.numberInWordsMap().get(hh%12) + string_Oclock;
 			}
-		}else if(Integer.parseInt(hh)>=0 && Integer.parseInt(hh)<24 && Integer.parseInt(mm)==15)
+		}else if(hh>=0 && hh<24 && mm==15)
 		{
-			if(Integer.parseInt(hh)==0 || Integer.parseInt(hh)==12) {
-				humanFriendlyTime =  "Quarter past "+clockconfiguration.hourMap().get(12);
+			if(hh==0 || hh==12) {
+				humanFriendlyTime =  string_QuaterPast_clock+clockconfiguration.numberInWordsMap().get(12);
 			}else {
-				humanFriendlyTime =  "Quarter past "+clockconfiguration.hourMap().get(Integer.parseInt(hh)%12);
+				humanFriendlyTime =  string_QuaterPast_clock+clockconfiguration.numberInWordsMap().get(hh%12);
 			}
 
 		}
-		else if(Integer.parseInt(hh)>=0 && Integer.parseInt(hh)<24 && Integer.parseInt(mm)==30)
+		else if(hh>=0 && hh<24 && mm==30)
 		{
-			if(Integer.parseInt(hh)==0 || Integer.parseInt(hh)==12) {
-				humanFriendlyTime =  "Half past "+clockconfiguration.hourMap().get(12);
+			if(hh==0 || hh==12) {
+				humanFriendlyTime =  string_HalfPast_clock+clockconfiguration.numberInWordsMap().get(12);
 			}else {
-				humanFriendlyTime =  "Half past "+clockconfiguration.hourMap().get(Integer.parseInt(hh)%12);
+				humanFriendlyTime =  string_HalfPast_clock+clockconfiguration.numberInWordsMap().get(hh%12);
 			}
 		}
-		else if(Integer.parseInt(hh)>=0 && Integer.parseInt(hh)<24 && Integer.parseInt(mm)==45)
+		else if(hh>=0 && hh<24 && mm==45)
 		{
-			if(Integer.parseInt(hh)==0 || Integer.parseInt(hh)==12) {
-				humanFriendlyTime =  "Quarter to "+clockconfiguration.hourMap().get(1);
+			if(hh==0 || hh==12) {
+				humanFriendlyTime =  string_QuaterTo_clock+clockconfiguration.numberInWordsMap().get(1);
 			}else {
-				humanFriendlyTime =  "Quarter to "+clockconfiguration.hourMap().get((Integer.parseInt(hh)%12)+1);
+				humanFriendlyTime =  string_QuaterTo_clock+clockconfiguration.numberInWordsMap().get((hh%12)+1);
 			}
 
-		}else if(Integer.parseInt(hh)>=0 && Integer.parseInt(hh)<24 && Integer.parseInt(mm)<60)
+		}else if(hh>=0 && hh<24 && mm<60)
 		{
-			if(Integer.parseInt(hh)==0 || Integer.parseInt(hh)==12) {
-				if(Integer.parseInt(mm)<30) {
-					humanFriendlyTime =  clockconfiguration.hourMap().get(12)+" past "+clockconfiguration.minuteMap().get(Integer.parseInt(mm));
+			if(hh==0 || hh==12) {
+				if(mm<30) {
+					humanFriendlyTime =  clockconfiguration.numberInWordsMap().get(12)+string_Past_clock+clockconfiguration.numberInWordsMap().get(mm);
 				}
 				else {
-					humanFriendlyTime =  clockconfiguration.minuteMap().get(60-Integer.parseInt(mm))+" to "+clockconfiguration.hourMap().get(1);
+					humanFriendlyTime =  clockconfiguration.numberInWordsMap().get(60-mm)+string_To_clock+clockconfiguration.numberInWordsMap().get(1);
 				}
 			}else {
-				if(Integer.parseInt(mm)<30) {
-					humanFriendlyTime =  clockconfiguration.hourMap().get(Integer.parseInt(hh)%12)
-							+" past "+clockconfiguration.minuteMap().get(Integer.parseInt(mm));
+				if(mm<30) {
+					humanFriendlyTime =  clockconfiguration.numberInWordsMap().get(hh%12)
+							+string_Past_clock+clockconfiguration.numberInWordsMap().get(mm);
 				}
 				else {
-					humanFriendlyTime =  clockconfiguration.minuteMap().get(60-Integer.parseInt(mm))
-							+" to "+clockconfiguration.hourMap().get((Integer.parseInt(hh)%12)+1);
+					humanFriendlyTime =  clockconfiguration.numberInWordsMap().get(60-mm)
+							+string_To_clock+clockconfiguration.numberInWordsMap().get((hh%12)+1);
 				}
 			}
 
@@ -77,20 +87,17 @@ public class ClockService {
 	public boolean ValidateTime(String timeparam) {
 
 		try {
-			String hh =timeparam.split(":")[0];
-			String mm =timeparam.split(":")[1];
-			if(timeparam==null || timeparam.length()!=5 || hh==null || mm==null) {
+			int hh =Integer.parseInt(timeparam.split(string_colon_splitter)[0]);
+			int mm =Integer.parseInt(timeparam.split(string_colon_splitter)[1]);
+			if(timeparam==null || timeparam.length()!=5) {
 				return false;
 			}
-			else if(Integer.parseInt(hh)>=0 
-					&& Integer.parseInt(hh)<24 
-					&& Integer.parseInt(mm)>=0 
-					&& Integer.parseInt(mm)<60)
+			else if(hh>=0 && hh<24 && mm>=0 && mm<60)
 			{
 				return true;
 			}
 		}
-	/*	catch(NumberFormatException e)
+		/*	catch(NumberFormatException e)
 		{
 			return false;
 		}

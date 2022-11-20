@@ -23,23 +23,17 @@ public class ClockController {
 	@Autowired
 	private ClockService clockservice; 
 
-	//	@GetMapping(value = "/ping")
-	//	public String ping() {
-
-	//return "pong";
-	//		return clockservice.calculateHumanFriendlyTime("10:00");
-	//	}
-
+	
 	@GetMapping(value = "/clock")
-	public ResponseEntity<ClockResponse> getTime(@RequestParam Optional<String> time) {
+	public ClockResponse getTime(@RequestParam Optional<String> time) {
 		ClockResponse clockResponse;
-		String timeparam =time.orElseGet(()-> LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+		String timeparam =time.orElse(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
 
 		boolean isValidTime = clockservice.ValidateTime(timeparam);
 
 		if (isValidTime) {
 			clockResponse = new ClockResponse(clockservice.calculateHumanFriendlyTime(timeparam));
-			return ResponseEntity.status(HttpStatus.OK).body(clockResponse);
+			return clockResponse;
 		}
 		else {
 			throw new InvalidInputException("Invalid Input.");
