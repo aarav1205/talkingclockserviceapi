@@ -1,90 +1,55 @@
 package lloyds.co.uk.talkingclock.controller;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import lloyds.co.uk.talkingclock.exceptionhandling.InvalidInputException;
+import lloyds.co.uk.talkingclock.model.ClockResponse;
 import lloyds.co.uk.talkingclock.service.ClockService;
 
-@AutoConfigureMockMvc
+
 @SpringBootTest
 public class ClockControllerTest {
 
-	private static MockHttpServletRequest request;
-	public static final MediaType Application_JSON = MediaType.APPLICATION_JSON;
-
 	@Mock
-	ClockService clockServiceMock;
+	private ClockService clockServiceMock;
+	
+	@InjectMocks
+	private ClockController clockController;
 
-	@Autowired
-	private MockMvc mockMVC;
+	@Test
+	public void test_getTime_withParam() {
+		
+		when(clockServiceMock.calculateHumanFriendlyTime("22:30")).thenReturn("Half past Ten");
+		when(clockServiceMock.ValidateTime("22:30")).thenReturn(true);
+		ClockResponse result = clockController.getTime(Optional.of("22:30"));
+		assertThat("Half past Ten",is(result.getValue()));
+		verify(clockServiceMock).calculateHumanFriendlyTime(Mockito.anyString());
+		verify(clockServiceMock).ValidateTime(Mockito.anyString());
 
-	@Test
-	public void getDefaultTimeTest() throws Exception {
-		mockMVC.perform( MockMvcRequestBuilders
-				.get("/clock")
-				.accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk())
-		.andExpect(MockMvcResultMatchers.jsonPath("$.value").exists());
-		
 	}
+	
 	@Test
-	public void getInputQuaterPastTimeTest() throws Exception {
-		String input = "12:15";
-		mockMVC.perform( MockMvcRequestBuilders
-				.get("/clock?time="+input)
-				.accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk())
-		.andExpect(MockMvcResultMatchers.jsonPath("$.value").exists());
-	}
-	@Test
-	public void getInputHalfPastTimeTest() throws Exception {
-		String input = "22:30";
-		mockMVC.perform( MockMvcRequestBuilders
-				.get("/clock?time="+input)
-				.accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk())
-		.andExpect(MockMvcResultMatchers.jsonPath("$.value",is("Half past Ten")));
+	public void test_getTime_Exception() {
 		
-	}
-	@Test
-	public void getInputTimeTest() throws Exception {
-		String input = "22:00";
-		mockMVC.perform( MockMvcRequestBuilders
-				.get("/clock?time="+input)
-				.accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk())
-		.andExpect(MockMvcResultMatchers.jsonPath("$.value",is("Ten O'clock")));
+		when(clockServiceMock.calculateHumanFriendlyTime(Mockito.anyString())).thenReturn("");
+		when(clockServiceMock.ValidateTime(Mockito.anyString())).thenReturn(false);
 		
-	}
-	@Test
-	public void getInvalidInputTimeTest() throws Exception {
-		String input = "12:1a";
-		mockMVC.perform( MockMvcRequestBuilders
-				.get("/clock?time="+input)
-				.accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isBadRequest());
-		
-	}
-	@Test
-	public void getInvalidInput2TimeTest() throws Exception {
-		String input = "12:99";
-		mockMVC.perform( MockMvcRequestBuilders
-				.get("/clock?time="+input)
-				.accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isBadRequest());
-		
+		assertThrows(InvalidInputException.class, ()->{
+			clockController.getTime(Optional.of("70:80"));
+		});
+
 	}
 
 }

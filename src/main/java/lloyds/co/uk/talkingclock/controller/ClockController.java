@@ -23,13 +23,14 @@ public class ClockController {
 	@Autowired
 	private ClockService clockservice; 
 
-	
+
 	@GetMapping(value = "/clock")
 	public ClockResponse getTime(@RequestParam Optional<String> time) {
+
 		ClockResponse clockResponse;
 		String timeparam =time.orElse(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
-
 		boolean isValidTime = clockservice.ValidateTime(timeparam);
+		
 
 		if (isValidTime) {
 			clockResponse = new ClockResponse(clockservice.calculateHumanFriendlyTime(timeparam));

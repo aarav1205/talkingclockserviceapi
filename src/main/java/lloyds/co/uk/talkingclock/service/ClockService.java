@@ -9,7 +9,7 @@ import lloyds.co.uk.talkingclock.config.ClockConfiguration;
 public class ClockService {
 
 	@Autowired
-	ClockConfiguration clockconfiguration;
+	private ClockConfiguration clockconfiguration;
 
 	private final String string_colon_splitter=":";
 	private final String string_Oclock=" O'clock";
@@ -85,7 +85,7 @@ public class ClockService {
 
 	}
 	public boolean ValidateTime(String timeparam) {
-
+ 
 		try {
 			int hh =Integer.parseInt(timeparam.split(string_colon_splitter)[0]);
 			int mm =Integer.parseInt(timeparam.split(string_colon_splitter)[1]);
